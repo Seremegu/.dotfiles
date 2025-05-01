@@ -1,0 +1,13 @@
+#!/bin/sh
+xrandr --newmode "1366x768_63.00" 85.500 1366 1494 1624 1798 768 770 776 795 +hsync -vsync
+xrandr --addmode VGA-0 1366x768_63.00
+xrandr --output VGA-0 --mode 1366x768_63.00
+nvidia-settings --assign "CurrentMetaMode=$(nvidia-settings --query CurrentMetaMode | awk -F'::' '{print $2}' | sed 's/}/, ForceFullCompositionPipeline=On&/g')"
+nvidia-settings --assign "CurrentMetaMode=$(nvidia-settings --query CurrentMetaMode | awk -F'::' '{print $2}' | sed 's/}/, SyncToVBlank=0&/g')"
+nvidia-settings --assign "CurrentMetaMode=$(nvidia-settings --query CurrentMetaMode | awk -F'::' '{print $2}' | sed 's/}/, OpenGLImageSettings=3&/g')"
+nvidia-settings --assign "CurrentMetaMode=$(nvidia-settings --query CurrentMetaMode | awk -F'::' '{print $2}' | sed 's/}/, GPUPowerMizerMode=2&/g')"
+numlockx on
+sleep 2s
+./Scripts/CapsLock.sh &
+redshift-gtk &
+parcellite &

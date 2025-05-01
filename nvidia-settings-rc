@@ -1,0 +1,30 @@
+#
+# /home/ziad/.nvidia-settings-rc
+#
+# Configuration file for nvidia-settings - the NVIDIA Settings utility
+# Generated on Fri Apr  4 20:24:33 2025
+#
+
+# ConfigProperties:
+
+RcFileLocale = C
+DisplayStatusBar = Yes
+SliderTextEntries = Yes
+IncludeDisplayNameInConfigFile = No
+ShowQuitDialog = No
+UpdateRulesOnProfileNameChange = Yes
+Timer = Memory_Used_(GPU_0),Yes,3000
+Timer = Thermal_Monitor_(GPU_0),Yes,1000
+Timer = PowerMizer_Monitor_(GPU_0),Yes,1000
+
+# Attributes:
+
+[DPY:VGA-0]/RedBrightness=0.000000
+[DPY:VGA-0]/GreenBrightness=0.000000
+[DPY:VGA-0]/BlueBrightness=0.000000
+[DPY:VGA-0]/RedContrast=0.000000
+[DPY:VGA-0]/GreenContrast=0.000000
+[DPY:VGA-0]/BlueContrast=0.000000
+[DPY:VGA-0]/RedGamma=1.000000
+[DPY:VGA-0]/GreenGamma=1.000000
+[DPY:VGA-0]/BlueGamma=1.000000
