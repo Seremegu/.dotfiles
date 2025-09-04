@@ -14,18 +14,23 @@ spawn-at-startup "xwayland-satellite"
 spawn-at-startup "mako"
   // Lockscreen
 // spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-monitors" "timeout" "600" "swaylock -f -l --font-size 26 --indicator-idle-visible" "before-sleep" "swaylock -f"
-spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-monitors" "timeout" "600" "gtklock"
+spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-monitors" "timeout" "600" "gtklock" "before-sleep" "gtklock"
   // Night light
 spawn-at-startup "gammastep" "-l" "31.1:29.8" "-t" "6500:3000"
   // Clipboard manager
   spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
   // Startup sound. Kind of screwed up.
 spawn-at-startup "aplay" "-D" "front" "-q" "/home/ziad/.config/niri/Debian Startup.wav"
-// spawn-at-startup "aplay" "-D" "front" "-q" "/home/ziad/.config/niri/Debian Startup.wav"
+
+// HOTKEY OVERLAY
+hotkey-overlay {
+    skip-at-startup
+}
 
 // VARIABLES
 environment {
     DISPLAY ":0"
+      // Are these too much?
     QT_QPA_PLATFORM "wayland"
     ELECTRON_OZONE_PLATFORM_HINT "auto"
     MOZ_ENABLE_WAYLAND "1"
@@ -36,13 +41,14 @@ environment {
     _JAVA_AWT_WM_NONREPARENTING "1"
     NO_AT_BRIDGE "1"
     XDG_SESSION_TYPE "wayland"
+      // This fixes applications like pavucontrol from not its items not appearing.
     GSK_RENDERER "ngl"
-    // Pretends it's running GNOME, required for applications like Flameshot.
+      // Pretends it's running Sway, required for applications like Flameshot.
     XDG_SESSION_DESKTOP "sway"
     XDG_CURRENT_DESKTOP "sway"
 }
 
-// CURSORS
+// CURSOR
 cursor {
     xcursor-theme "catppuccin-mocha-pink-cursors"
 }
@@ -51,17 +57,17 @@ cursor {
 input {
     keyboard {
         xkb {
-            // English and Arabic
+              // English and Arabic
             layout "us,ara"
-            // Layout toggle
-            // options "grp:win_space_toggle,grp:alt_shift_toggle"
+              // Layout toggle
+              // options "grp:win_space_toggle,grp:alt_shift_toggle"
             options "grp:alt_shift_toggle"
         }
-        // Numlock
+          // Numlock
         numlock
     }
 
-    // Mouse/Touchpad/Trackpoint input. I don't know.
+    // Mouse/Touchpad/Trackpoint input
     touchpad {
         // off
         tap
@@ -156,65 +162,43 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 // screenshot-path null
 
 // ANIMATIONS
+// Taken from https://github.com/rickinshah/0xNiri
 animations {
-  slowdown 0.6
-
-  window-open {
-    duration-ms 200
-    curve "linear"
-    custom-shader r"
-
-    vec4 expanding_circle(vec3 coords_geo, vec3 size_geo) {
-      vec3 coords_tex = niri_geo_to_tex * coords_geo;
-      vec4 color = texture2D(niri_tex, coords_tex.st);
-      vec2 coords = (coords_geo.xy - vec2(0.5, 0.5)) * size_geo.xy * 2.0;
-      coords = coords / length(size_geo.xy);
-      float p = niri_clamped_progress;
-      if (p * p <= dot(coords, coords))
-      color = vec4(0.0);
-
-      return color;
+    // off
+    window-close {
+        duration-ms 250
+        curve "ease-out-quad"
     }
 
-    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
-      return expanding_circle(coords_geo, size_geo);
-    }
-    "
-  }
-
-  window-close {
-    duration-ms 175
-    curve "linear"
-    custom-shader r"
-    vec4 shrinking_circle(vec3 coords_geo, vec3 size_geo) {
-      vec3 coords_tex = niri_geo_to_tex * coords_geo;
-      vec4 color = texture2D(niri_tex, coords_tex.st);
-      // Calculate coordinates relative to center, scaled appropriately
-      vec2 coords = (coords_geo.xy - vec2(0.5, 0.5)) * size_geo.xy * 2.0;
-      // Normalize coordinates based on diagonal length for a circular shape
-      coords = coords / length(size_geo.xy);
-
-      // Invert the progress for closing effect: 1 -> 0
-      float p_close = 1.0 - niri_clamped_progress;
-
-      // If pixel's squared distance from center is >= shrinking radius squared, make transparent
-      // (Keeps pixels *inside* the shrinking radius p_close)
-      if (p_close * p_close <= dot(coords, coords))
-      color = vec4(0.0);
-
-      // Optional: You could also fade the alpha slightly faster at the end if desired
-      // color.a *= p_close; // Fades out completely as radius reaches 0
-
-      return color;
+    screenshot-ui-open {
+        duration-ms 500
+        curve "ease-out-quad"
     }
 
-    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
-      return shrinking_circle(coords_geo, size_geo);
-    }"
-  }
+    workspace-switch {
+        spring damping-ratio=0.7 stiffness=200 epsilon=0.0001
+    }
 
-  window-resize {
-  }
+    overview-open-close {
+        spring damping-ratio=0.7 stiffness=200 epsilon=0.0001
+    }
+
+    horizontal-view-movement {
+        spring damping-ratio=0.7 stiffness=200 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=0.7 stiffness=200 epsilon=0.0001
+    }
+
+    window-open {
+        spring damping-ratio=0.7 stiffness=200 epsilon=0.0001
+    }
+
+    window-movement {
+        spring damping-ratio=0.7 stiffness=200 epsilon=0.0001
+    }
+
+    slowdown 0.6
 }
 
 // WINDOW RULES
@@ -245,21 +229,18 @@ window-rule {
     // open-fullscreen true
 }
 
-  // This doesn't work?
 window-rule {
     match app-id=r#"((F|f)ire|(W|w)ater)fox$"# title="^(L|l)ibrary$"
     open-floating true
     open-maximized false
-    default-column-width { proportion 0.5; }
+    default-column-width { proportion 0.6; }
+    default-window-height { fixed 600; }
+    opacity 0.8
 }
 
 window-rule {
     geometry-corner-radius 16
     clip-to-geometry true
-}
-
-hotkey-overlay {
-    skip-at-startup
 }
 
 // KEYBOARD SHORTCUTS
@@ -283,21 +264,26 @@ binds {
     Super+L hotkey-overlay-title="Lock screen" { spawn "gtklock"; }
       // Clipboard manager
     Mod+V   hotkey-overlay-title="Clipboard manager: cliphist" repeat=false { spawn "bash" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
+      // Screenshot
+    Print { spawn "flameshot" "gui"; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
   
     // Audio
       // I do not think I like WirePlumber.
-    // XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"; }
-    // XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"; }
-    // XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    // Mod+Prior allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"; }
+    // Mod+Next  allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"; }
+    // Mod+End   allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
     // XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
     Mod+Prior allow-when-locked=true { spawn "amixer" "set" "'Master'" "2%+"; }
     Mod+Next allow-when-locked=true { spawn "amixer" "set" "'Master'" "2%-"; }
     Mod+End  allow-when-locked=true { spawn "amixer" "set" "'Master'" "toggle"; }
     
+    // Window/Column control
     Mod+O repeat=false { toggle-overview; }
     Mod+Q { close-window; }
     Alt+F4 { close-window; }
-
+    
     Mod+Left  { focus-column-left; }
     Mod+Down  { focus-window-down; }
     Mod+M    { focus-window-up; }
@@ -306,7 +292,6 @@ binds {
     Mod+J     { focus-window-down; }
     Mod+K     { focus-window-up; }
     Mod+L     { focus-column-right; }
-
     Ctrl+Mod+Left  { move-column-left; }
     Ctrl+Mod+Down  { move-window-down; }
     Ctrl+Mod+Up    { move-window-up; }
@@ -315,11 +300,10 @@ binds {
     Mod+Ctrl+J     { move-window-down; }
     Mod+Ctrl+K     { move-window-up; }
     Mod+Ctrl+L     { move-column-right; }
-
     Mod+Home      { focus-column-first; }
     // Mod+End       { focus-column-last; }
-    Mod+Ctrl+Home { move-column-to-first; }
-    Mod+Ctrl+End  { move-column-to-last; }
+    Ctrl+Mod+Home { move-column-to-first; }
+    Ctrl+Mod+End  { move-column-to-last; }
 
     Mod+Shift+Left  { focus-monitor-left; }
     Mod+Shift+Down  { focus-monitor-down; }
@@ -395,26 +379,17 @@ binds {
     Mod+Shift+Minus { set-window-height "-10%"; }
     Mod+Shift+Equal { set-window-height "+10%"; }
 
-    // Move the focused window between the floating and the tiling layout.
+    // Toggle between floating and the tiling layout
     // Mod+V       { toggle-window-floating; }
     // Mod+Shift+V { switch-focus-between-floating-and-tiling; }
 
-    // Toggle tabbed column display mode.
-    // Windows in this column will appear as vertical tabs,
-    // rather than stacked on top of each other.
-    Mod+W { toggle-column-tabbed-display; }
+    // Tabbed display mode
+    // Mod+W { toggle-column-tabbed-display; }
 
-    // Actions to switch layouts.
-    // Note: if you uncomment these, make sure you do NOT have
-    // a matching layout switch hotkey configured in xkb options above.
-    // Having both at once on the same hotkey will break the switching,
-    // since it will switch twice upon pressing the hotkey (once by xkb, once by niri).
+    // Switch layouts
+    // Doesn't matter as there's another setting.
     // Mod+Space       { switch-layout "next"; }
     // Mod+Shift+Space { switch-layout "prev"; }
-
-    Print { spawn "flameshot" "gui"; }
-    Ctrl+Print { screenshot-screen; }
-    Alt+Print { screenshot-window; }
 
     // Applications such as remote-desktop clients and software KVM switches may
     // request that niri stops processing the keyboard shortcuts defined here
