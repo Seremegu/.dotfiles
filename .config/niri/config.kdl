@@ -4,7 +4,7 @@ spawn-at-startup "pipewire"
   // Waybar
 spawn-at-startup "waybar"
   // Wallpaper
-spawn-at-startup "swaybg" "-i" "/home/ziad/Pictures/Luka_25_trained_art.png" "-m" "fill"
+spawn-at-startup "swaybg" "-i" "/home/ziad/Pictures/Luka_46_trained_art.png" "-m" "fill"
   // Polkit
 spawn-at-startup "/usr/libexec/polkit-mate-authentication-agent-1"
 // spawn-at-startup "/usr/libexec/xfce-polkit"
@@ -14,7 +14,7 @@ spawn-at-startup "xwayland-satellite"
 spawn-at-startup "mako"
   // Lockscreen
 // spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-monitors" "timeout" "600" "swaylock -f -l --font-size 26 --indicator-idle-visible" "before-sleep" "swaylock -f"
-spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-monitors" "timeout" "600" "gtklock" "before-sleep" "gtklock"
+spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-monitors" "timeout" "600" "gtklock -d" "before-sleep" "gtklock -d"
   // Night light
 spawn-at-startup "gammastep" "-l" "31.1:29.8" "-t" "6500:3000"
   // Clipboard manager
@@ -41,7 +41,7 @@ environment {
     _JAVA_AWT_WM_NONREPARENTING "1"
     NO_AT_BRIDGE "1"
     XDG_SESSION_TYPE "wayland"
-      // This fixes applications like pavucontrol from not its items not appearing.
+      // This fixes applications like pavucontrol from its items not appearing.
     GSK_RENDERER "ngl"
       // Pretends it's running Sway, required for applications like Flameshot.
     XDG_SESSION_DESKTOP "sway"
