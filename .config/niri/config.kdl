@@ -18,7 +18,7 @@ spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-moni
   // Night light
 spawn-at-startup "gammastep" "-l" "31.1:29.8" "-t" "6500:3000"
   // Clipboard manager
-  spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
   // Startup sound. Kind of screwed up.
 spawn-at-startup "aplay" "-D" "front" "-q" "/home/ziad/.config/niri/Debian Startup.wav"
 
@@ -165,6 +165,9 @@ screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 // Taken from https://github.com/rickinshah/0xNiri
 animations {
     // off
+    
+    slowdown 0.6
+    
     window-close {
         duration-ms 250
         curve "ease-out-quad"
@@ -197,8 +200,6 @@ animations {
     window-movement {
         spring damping-ratio=0.7 stiffness=200 epsilon=0.0001
     }
-
-    slowdown 0.6
 }
 
 // WINDOW RULES
