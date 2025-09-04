@@ -1,0 +1,452 @@
+// AUTOSTART
+  // Goshdamn PipeWire
+spawn-at-startup "pipewire" 
+  // Waybar
+spawn-at-startup "waybar"
+  // Wallpaper
+spawn-at-startup "swaybg" "-i" "/home/ziad/Pictures/Luka_25_trained_art.png" "-m" "fill"
+  // Polkit
+spawn-at-startup "/usr/libexec/polkit-mate-authentication-agent-1"
+// spawn-at-startup "/usr/libexec/xfce-polkit"
+  // Funny Wayland moment
+spawn-at-startup "xwayland-satellite"
+  // I forgot what this is. Notification daemon?
+spawn-at-startup "mako"
+  // Lockscreen
+// spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-monitors" "timeout" "600" "swaylock -f -l --font-size 26 --indicator-idle-visible" "before-sleep" "swaylock -f"
+spawn-at-startup "swayidle" "-w" "timeout" "601" "niri msg action power-off-monitors" "timeout" "600" "gtklock"
+  // Night light
+spawn-at-startup "gammastep" "-l" "31.1:29.8" "-t" "6500:3000"
+  // Clipboard manager
+  spawn-at-startup "wl-paste" "--watch" "cliphist" "store"
+  // Startup sound. Kind of screwed up.
+spawn-at-startup "aplay" "-D" "front" "-q" "/home/ziad/.config/niri/Debian Startup.wav"
+// spawn-at-startup "aplay" "-D" "front" "-q" "/home/ziad/.config/niri/Debian Startup.wav"
+
+// VARIABLES
+environment {
+    DISPLAY ":0"
+    QT_QPA_PLATFORM "wayland"
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    MOZ_ENABLE_WAYLAND "1"
+    CLUTTER_BACKEND "wayland"
+    ECORE_EVAS_ENGINE "wayland"
+    ELM_ENGINE "wayland"
+    SDL_VIDEODRIVER "wayland"
+    _JAVA_AWT_WM_NONREPARENTING "1"
+    NO_AT_BRIDGE "1"
+    XDG_SESSION_TYPE "wayland"
+    GSK_RENDERER "ngl"
+    // Pretends it's running GNOME, required for applications like Flameshot.
+    XDG_SESSION_DESKTOP "sway"
+    XDG_CURRENT_DESKTOP "sway"
+}
+
+// CURSORS
+cursor {
+    xcursor-theme "catppuccin-mocha-pink-cursors"
+}
+
+// INPUT
+input {
+    keyboard {
+        xkb {
+            // English and Arabic
+            layout "us,ara"
+            // Layout toggle
+            // options "grp:win_space_toggle,grp:alt_shift_toggle"
+            options "grp:alt_shift_toggle"
+        }
+        // Numlock
+        numlock
+    }
+
+    // Mouse/Touchpad/Trackpoint input. I don't know.
+    touchpad {
+        // off
+        tap
+        // dwt
+        // dwtp
+        // drag false
+        // drag-lock
+        natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "two-finger"
+        // disabled-on-external-mouse
+    }
+
+    mouse {
+        // off
+        // natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "no-scroll"
+    }
+
+    trackpoint {
+        // off
+        // natural-scroll
+        // accel-speed 0.2
+        // accel-profile "flat"
+        // scroll-method "on-button-down"
+        // scroll-button 273
+        // middle-emulation
+    }
+
+    warp-mouse-to-focus
+    // focus-follows-mouse
+}
+
+// SCREEN
+output "VGA-1" {
+    mode "1366x768@59.80"
+    scale 1
+    transform "normal"
+}
+
+// LAYOUT
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Layout
+layout {
+    gaps 6
+    always-center-single-column
+    center-focused-column "never"
+
+    preset-column-widths {
+        proportion 0.5
+        fixed 1366
+    }
+
+    preset-window-heights {
+        proportion 0.5
+        fixed 768
+    }
+
+    default-column-width { proportion 0.5; }
+    // default-column-width {}
+
+    focus-ring {
+        off
+        width 2
+        active-color "#fff"
+        inactive-color "#202020"
+    }
+
+    border {
+        off
+        width 2
+        active-color "#909090"
+        inactive-color "#606060"
+        urgent-color "#fff"
+    }
+
+    shadow {
+        on
+        draw-behind-window true
+        softness 10
+        spread 6
+        offset x=0 y=0
+        color "#0006"
+    }
+}
+
+prefer-no-csd
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+// screenshot-path null
+
+// ANIMATIONS
+animations {
+  slowdown 0.6
+
+  window-open {
+    duration-ms 200
+    curve "linear"
+    custom-shader r"
+
+    vec4 expanding_circle(vec3 coords_geo, vec3 size_geo) {
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+      vec2 coords = (coords_geo.xy - vec2(0.5, 0.5)) * size_geo.xy * 2.0;
+      coords = coords / length(size_geo.xy);
+      float p = niri_clamped_progress;
+      if (p * p <= dot(coords, coords))
+      color = vec4(0.0);
+
+      return color;
+    }
+
+    vec4 open_color(vec3 coords_geo, vec3 size_geo) {
+      return expanding_circle(coords_geo, size_geo);
+    }
+    "
+  }
+
+  window-close {
+    duration-ms 175
+    curve "linear"
+    custom-shader r"
+    vec4 shrinking_circle(vec3 coords_geo, vec3 size_geo) {
+      vec3 coords_tex = niri_geo_to_tex * coords_geo;
+      vec4 color = texture2D(niri_tex, coords_tex.st);
+      // Calculate coordinates relative to center, scaled appropriately
+      vec2 coords = (coords_geo.xy - vec2(0.5, 0.5)) * size_geo.xy * 2.0;
+      // Normalize coordinates based on diagonal length for a circular shape
+      coords = coords / length(size_geo.xy);
+
+      // Invert the progress for closing effect: 1 -> 0
+      float p_close = 1.0 - niri_clamped_progress;
+
+      // If pixel's squared distance from center is >= shrinking radius squared, make transparent
+      // (Keeps pixels *inside* the shrinking radius p_close)
+      if (p_close * p_close <= dot(coords, coords))
+      color = vec4(0.0);
+
+      // Optional: You could also fade the alpha slightly faster at the end if desired
+      // color.a *= p_close; // Fades out completely as radius reaches 0
+
+      return color;
+    }
+
+    vec4 close_color(vec3 coords_geo, vec3 size_geo) {
+      return shrinking_circle(coords_geo, size_geo);
+    }"
+  }
+
+  window-resize {
+  }
+}
+
+// WINDOW RULES
+window-rule {
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    default-column-width {}
+}
+
+window-rule {
+    draw-border-with-background false
+}
+
+window-rule {
+    match app-id="((F|f)ire|(W|w)ater)fox"
+    open-maximized true
+}
+
+window-rule {
+    match app-id="zsnes"
+    open-maximized true
+    open-floating false
+}
+
+window-rule {
+    match app-id=r#"((F|f)ire|(W|w)ater)fox$"# title="^Picture-in-Picture$"
+    open-floating true
+    open-maximized true
+    // open-fullscreen true
+}
+
+  // This doesn't work?
+window-rule {
+    match app-id=r#"((F|f)ire|(W|w)ater)fox$"# title="^(L|l)ibrary$"
+    open-floating true
+    open-maximized false
+    default-column-width { proportion 0.5; }
+}
+
+window-rule {
+    geometry-corner-radius 16
+    clip-to-geometry true
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+// KEYBOARD SHORTCUTS
+// Use wev for key names. Mod is Super.
+binds {
+    // List of hotkeys
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    // Application shortcuts
+      // Terminal
+    Mod+F12 hotkey-overlay-title="Terminal" { spawn "sakura"; }
+      // Web browser
+    Mod+F10 hotkey-overlay-title="Web browser" { spawn "waterfox"; }
+      // File manager
+    Mod+F11 hotkey-overlay-title="File Manager" { spawn "thunar"; }
+      // Application manager
+    Mod+D hotkey-overlay-title="Fuzzel" { spawn "fuzzel"; }
+      // Task manager
+    Ctrl+Shift+Escape hotkey-overlay-title="Task manager" { spawn "xfce4-taskmanager"; }
+      // Lock screen
+    Super+L hotkey-overlay-title="Lock screen" { spawn "gtklock"; }
+      // Clipboard manager
+    Mod+V   hotkey-overlay-title="Clipboard manager: cliphist" repeat=false { spawn "bash" "-c" "cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"; }
+  
+    // Audio
+      // I do not think I like WirePlumber.
+    // XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"; }
+    // XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"; }
+    // XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    // XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+    Mod+Prior allow-when-locked=true { spawn "amixer" "set" "'Master'" "2%+"; }
+    Mod+Next allow-when-locked=true { spawn "amixer" "set" "'Master'" "2%-"; }
+    Mod+End  allow-when-locked=true { spawn "amixer" "set" "'Master'" "toggle"; }
+    
+    Mod+O repeat=false { toggle-overview; }
+    Mod+Q { close-window; }
+    Alt+F4 { close-window; }
+
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+M    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+    Mod+H     { focus-column-left; }
+    Mod+J     { focus-window-down; }
+    Mod+K     { focus-window-up; }
+    Mod+L     { focus-column-right; }
+
+    Ctrl+Mod+Left  { move-column-left; }
+    Ctrl+Mod+Down  { move-window-down; }
+    Ctrl+Mod+Up    { move-window-up; }
+    Ctrl+Mod+Right { move-column-right; }
+    Mod+Ctrl+H     { move-column-left; }
+    Mod+Ctrl+J     { move-window-down; }
+    Mod+Ctrl+K     { move-window-up; }
+    Mod+Ctrl+L     { move-column-right; }
+
+    Mod+Home      { focus-column-first; }
+    // Mod+End       { focus-column-last; }
+    Mod+Ctrl+Home { move-column-to-first; }
+    Mod+Ctrl+End  { move-column-to-last; }
+
+    Mod+Shift+Left  { focus-monitor-left; }
+    Mod+Shift+Down  { focus-monitor-down; }
+    Mod+Shift+Up    { focus-monitor-up; }
+    Mod+Shift+Right { focus-monitor-right; }
+    Mod+Shift+H     { focus-monitor-left; }
+    Mod+Shift+J     { focus-monitor-down; }
+    Mod+Shift+K     { focus-monitor-up; }
+    Mod+Shift+L     { focus-monitor-right; }
+
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
+
+    Mod+Delete         { focus-workspace-down; }
+    Mod+Insert         { focus-workspace-up; }
+    Mod+U              { focus-workspace-down; }
+    Mod+I              { focus-workspace-up; }
+    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+    Mod+Ctrl+U         { move-column-to-workspace-down; }
+    Mod+Ctrl+I         { move-column-to-workspace-up; }
+
+    Mod+Shift+Page_Down { move-workspace-down; }
+    Mod+Shift+Page_Up   { move-workspace-up; }
+    Mod+Shift+U         { move-workspace-down; }
+    Mod+Shift+I         { move-workspace-up; }
+    
+    // Mouse moment
+    Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
+    Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
+    Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
+    Mod+Ctrl+WheelScrollUp   cooldown-ms=150 { move-column-to-workspace-up; }
+
+    Mod+WheelScrollRight      { focus-column-right; }
+    Mod+WheelScrollLeft       { focus-column-left; }
+    Mod+Ctrl+WheelScrollRight { move-column-right; }
+    Mod+Ctrl+WheelScrollLeft  { move-column-left; }
+
+    Mod+Shift+WheelScrollDown      { focus-column-right; }
+    Mod+Shift+WheelScrollUp        { focus-column-left; }
+    Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
+    Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
+    
+    // Change workspaces
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Ctrl+Mod+1 { move-column-to-workspace 1; }
+    Ctrl+Mod+2 { move-column-to-workspace 2; }
+    Ctrl+Mod+3 { move-column-to-workspace 3; }
+    Ctrl+Mod+4 { move-column-to-workspace 4; }
+    Ctrl+Mod+5 { move-column-to-workspace 5; }
+    Ctrl+Mod+6 { move-column-to-workspace 6; }
+    Ctrl+Mod+7 { move-column-to-workspace 7; }
+    Ctrl+Mod+8 { move-column-to-workspace 8; }
+    Ctrl+Mod+9 { move-column-to-workspace 9; }
+
+    // Manual size change
+    Mod+Minus { set-column-width "-10%"; }
+    Mod+Equal { set-column-width "+10%"; }
+    Mod+Shift+Minus { set-window-height "-10%"; }
+    Mod+Shift+Equal { set-window-height "+10%"; }
+
+    // Move the focused window between the floating and the tiling layout.
+    // Mod+V       { toggle-window-floating; }
+    // Mod+Shift+V { switch-focus-between-floating-and-tiling; }
+
+    // Toggle tabbed column display mode.
+    // Windows in this column will appear as vertical tabs,
+    // rather than stacked on top of each other.
+    Mod+W { toggle-column-tabbed-display; }
+
+    // Actions to switch layouts.
+    // Note: if you uncomment these, make sure you do NOT have
+    // a matching layout switch hotkey configured in xkb options above.
+    // Having both at once on the same hotkey will break the switching,
+    // since it will switch twice upon pressing the hotkey (once by xkb, once by niri).
+    // Mod+Space       { switch-layout "next"; }
+    // Mod+Shift+Space { switch-layout "prev"; }
+
+    Print { spawn "flameshot" "gui"; }
+    Ctrl+Print { screenshot-screen; }
+    Alt+Print { screenshot-window; }
+
+    // Applications such as remote-desktop clients and software KVM switches may
+    // request that niri stops processing the keyboard shortcuts defined here
+    // so they may, for example, forward the key presses as-is to a remote machine.
+    // It's a good idea to bind an escape hatch to toggle the inhibitor,
+    // so a buggy application can't hold your session hostage.
+    //
+    // The allow-inhibiting=false property can be applied to other binds as well,
+    // which ensures niri always processes them, even when an inhibitor is active.
+    Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
+
+    // Misc
+    Mod+Space        { toggle-window-floating; }
+    Mod+Shift+Space  { switch-focus-between-floating-and-tiling; }
+    // Mod+Ctrl+1 { move-window-to-workspace 1; }
+    Mod+Tab { focus-workspace-previous; }
+    Mod+BracketLeft  { consume-or-expel-window-left; }
+    Mod+BracketRight { consume-or-expel-window-right; }
+    Mod+Comma  { consume-window-into-column; }
+    Mod+Period { expel-window-from-column; }
+    Mod+X { switch-preset-column-width; }
+    Ctrl+Mod+X { switch-preset-window-height; }
+    Mod+Ctrl+R { reset-window-height; }
+    Mod+Up { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+C { center-column; }
+    Ctrl+Mod+C { center-visible-columns; }
+
+    // Quit
+    Mod+Shift+E { quit; }
+    // Leave session
+    Ctrl+Alt+Delete { spawn "wlogout" "-p" "layer-shell" "&"; }
+    // Turn off monitor
+    Ctrl+Alt+Space { power-off-monitors; }
+}
