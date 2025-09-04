@@ -1,27 +1,27 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
-
-alias anime='anipy-cli -q 360'
+fastfetch
+# Aliases
 alias update='sudo xbps-install -Su'
 alias install='sudo xbps-install'
 alias reinstall='sudo xbps-install -f'
 alias search='xbps-query -Rs'
 alias remove='sudo xbps-remove -F -R'
 alias spotify='spotdl --output ~/Music/Spotify --overwrite skip'
-
-# Only for Niri
+alias anime='anipy-cli -q 360'
+#   Only for Niri
 alias pcmanfm-sudo='sudo env WAYLAND_DISPLAY="$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" XDG_RUNTIME_DIR=/run/user/0 pcmanfm'
 alias thunar-sudo='sudo env WAYLAND_DISPLAY="$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" XDG_RUNTIME_DIR=/run/user/0 thunar'
 alias mousepad-sudo='sudo env WAYLAND_DISPLAY="$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" XDG_RUNTIME_DIR=/run/user/0 mousepad'
 
-# Path to your Oh My Zsh installation.
+# Environment variables
+export ZSH="$HOME/.oh-my-zsh"
 export PF_INFO="ascii title os host kernel uptime pkgs memory"
 export PF_SEP=""
-export ZSH="$HOME/.oh-my-zsh"
 #export WINEPREFIX=$HOME/Wine/prefix 
 #export WINEARCH=wow64 
 #export WINEPATH=$HOME/Wine
-fastfetch
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
